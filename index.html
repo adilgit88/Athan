@@ -9,7 +9,8 @@
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src 'self' https://fonts.gstatic.com;
                  media-src 'self' file:;
-                 img-src 'self' data:;" />
+                 img-src 'self' data: file:;
+                 connect-src 'self' http://ip-api.com https://api.aladhan.com http://api.aladhan.com;" />
   <title>Islamic Smart Clock</title>
 
   <!--
@@ -69,6 +70,11 @@
           <div class="settings-row">
             <label class="settings-label" for="s-city">City Name</label>
             <input class="settings-input" id="s-city" type="text" placeholder="e.g. Toronto" />
+          </div>
+
+          <div class="settings-row">
+            <label class="settings-label">Auto Detect</label>
+            <button class="settings-detect-btn" id="s-detect-btn">⦿ Detect My Location</button>
           </div>
 
           <div class="settings-row">
@@ -256,7 +262,11 @@
 
         <!-- Fajr -->
         <article class="prayer-card" id="prayer-fajr" data-prayer="fajr">
-          <div class="prayer-icon">🌙</div>
+          <div class="prayer-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <div class="prayer-name-en">Fajr</div>
           <div class="prayer-name-ar" lang="ar">الفجر</div>
           <div class="prayer-time" id="time-fajr">—:——</div>
@@ -265,7 +275,13 @@
 
         <!-- Sunrise / Shuruq -->
         <article class="prayer-card" id="prayer-sunrise" data-prayer="sunrise">
-          <div class="prayer-icon">🌅</div>
+          <div class="prayer-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2v4M4.93 7.93l2.83 2.83M2 15h4M18 10.76l2.83-2.83M22 15h-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 15a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="3" y1="19" x2="21" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="prayer-name-en">Shuruq</div>
           <div class="prayer-name-ar" lang="ar">الشروق</div>
           <div class="prayer-time" id="time-sunrise">—:——</div>
@@ -274,7 +290,12 @@
 
         <!-- Dhuhr -->
         <article class="prayer-card" id="prayer-dhuhr" data-prayer="dhuhr">
-          <div class="prayer-icon">☀️</div>
+          <div class="prayer-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="prayer-name-en">Dhuhr</div>
           <div class="prayer-name-ar" lang="ar">الظهر</div>
           <div class="prayer-time" id="time-dhuhr">—:——</div>
@@ -283,7 +304,13 @@
 
         <!-- Asr -->
         <article class="prayer-card" id="prayer-asr" data-prayer="asr">
-          <div class="prayer-icon">🌤️</div>
+          <div class="prayer-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="prayer-name-en">Asr</div>
           <div class="prayer-name-ar" lang="ar">العصر</div>
           <div class="prayer-time" id="time-asr">—:——</div>
@@ -292,7 +319,14 @@
 
         <!-- Maghrib -->
         <article class="prayer-card" id="prayer-maghrib" data-prayer="maghrib">
-          <div class="prayer-icon">🌇</div>
+          <div class="prayer-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 15a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M19 15l-2.5-2.5M5 15l2.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <line x1="3" y1="19" x2="21" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M12 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="prayer-name-en">Maghrib</div>
           <div class="prayer-name-ar" lang="ar">المغرب</div>
           <div class="prayer-time" id="time-maghrib">—:——</div>
@@ -301,7 +335,12 @@
 
         <!-- Isha -->
         <article class="prayer-card" id="prayer-isha" data-prayer="isha">
-          <div class="prayer-icon">🌙</div>
+          <div class="prayer-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="16" cy="8" r="1.2" fill="currentColor"/>
+            </svg>
+          </div>
           <div class="prayer-name-en">Isha</div>
           <div class="prayer-name-ar" lang="ar">العشاء</div>
           <div class="prayer-time" id="time-isha">—:——</div>

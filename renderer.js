@@ -26,7 +26,7 @@ const adhan  = require('adhan');
 const fs     = require('fs');
 const path   = require('path');
 const https  = require('https');
-const http   = require('http');
+const http   = require('http'); // kept for ip-api.com (HTTP only)
 
 // When running as a portable .exe, electron-builder sets PORTABLE_EXECUTABLE_DIR
 // to the folder where the .exe lives.  We write settings + cache there so they
@@ -44,8 +44,37 @@ const API_CFG   = CONFIG.api;
 let DISP_CFG    = { ...CONFIG.display };
 
 // ─────────────────────────────────────────────────────────────
-//  Settings — persist user overrides to settings.json
+//  Auto-detect location via ip-api.com (IP-based, no GPS needed)
+//  Returns { latitude, longitude, city } or null on failure.
 // ─────────────────────────────────────────────────────────────
+function detectLocationByIP() {
+  return new Promise((resolve) => {
+    const url = 'http://ip-api.com/json?fields=status,city,regionName,lat,lon,timezone';
+    const req = http.get(url, { timeout: 5000 }, (res) => {
+      let raw = '';
+      res.on('data', chunk => { raw += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(raw);
+          if (json.status === 'success') {
+            console.log(`[Location] Auto-detected: ${json.city}, ${json.regionName} (${json.lat}, ${json.lon})`);
+            resolve({ latitude: json.lat, longitude: json.lon, city: json.city });
+          } else {
+            console.warn('[Location] ip-api returned failure status');
+            resolve(null);
+          }
+        } catch (e) {
+          console.warn('[Location] Failed to parse ip-api response:', e.message);
+          resolve(null);
+        }
+      });
+    });
+    req.on('error',   () => { console.warn('[Location] ip-api request error'); resolve(null); });
+    req.on('timeout', () => { req.destroy(); console.warn('[Location] ip-api timeout'); resolve(null); });
+  });
+}
+
+
 const SETTINGS_FILE = path.join(APP_DIR, 'settings.json');
 
 function loadSettings() {
@@ -626,9 +655,9 @@ function saveCache(key, timings) {
 function fetchApiPrayerTimes(date, key) {
   return new Promise((resolve, reject) => {
     const ts  = Math.floor(date.getTime() / 1000);
-    const url = `http://api.aladhan.com/v1/timings/${ts}?latitude=${LOC.latitude}&longitude=${LOC.longitude}&method=${API_CFG.method}`;
+    const url = `https://api.aladhan.com/v1/timings/${ts}?latitude=${LOC.latitude}&longitude=${LOC.longitude}&method=${API_CFG.method}`;
 
-    const req = http.get(url, { timeout: API_CFG.timeout }, (res) => {
+    const req = https.get(url, { timeout: API_CFG.timeout }, (res) => {
       let raw = '';
       res.on('data', chunk => { raw += chunk; });
       res.on('end', () => {
@@ -1135,6 +1164,28 @@ function setupSettingsModal() {
   closeBtn.addEventListener('click', closeSettings);
   cancelBtn.addEventListener('click', closeSettings);
 
+  // ── Detect My Location button ─────────────────────────────
+  const detectBtn = $('s-detect-btn');
+  if (detectBtn) {
+    detectBtn.addEventListener('click', async () => {
+      detectBtn.textContent = '⟳ Detecting…';
+      detectBtn.disabled = true;
+      const detected = await detectLocationByIP();
+      if (detected) {
+        $('s-lat').value  = detected.latitude;
+        $('s-lng').value  = detected.longitude;
+        $('s-city').value = detected.city;
+        detectBtn.textContent = '✓ Detected: ' + detected.city;
+      } else {
+        detectBtn.textContent = '✗ Failed — check internet';
+      }
+      setTimeout(() => {
+        detectBtn.textContent = '⦿ Detect My Location';
+        detectBtn.disabled = false;
+      }, 3000);
+    });
+  }
+
   // Click backdrop to close
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeSettings();
@@ -1228,6 +1279,31 @@ async function init() {
 
   // Load persisted user settings first (overrides config.js defaults)
   loadSettings();
+
+  // Auto-detect location via IP — only if no saved location in settings.json
+  // (if the user has manually set a city, we respect that)
+  const hasManualLocation = (() => {
+    try {
+      if (!fs.existsSync(SETTINGS_FILE)) return false;
+      const saved = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+      return !!(saved.location && saved.location.city);
+    } catch (_) { return false; }
+  })();
+
+  if (!hasManualLocation) {
+    console.log('[Location] No saved location — attempting auto-detect…');
+    const detected = await detectLocationByIP();
+    if (detected) {
+      LOC.latitude  = detected.latitude;
+      LOC.longitude = detected.longitude;
+      LOC.city      = detected.city;
+      console.log('[Location] Using auto-detected:', LOC.city);
+    } else {
+      console.warn('[Location] Auto-detect failed — using config.js default:', LOC.city);
+    }
+  } else {
+    console.log('[Location] Using saved location:', LOC.city);
+  }
 
   // Set default clock color CSS vars so they always exist
   resetClockColor();
