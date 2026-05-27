@@ -2,7 +2,7 @@
 
 A full-screen Islamic prayer times clock built with Electron. Designed as an always-on kiosk display for desktops and tablets (optimised for Windows 11 / Surface Go).
 
-![Islamic Smart Clock](assets/icons/icon.png)
+![Islamic Smart Clock](assets/icons/sample.png)
 
 ---
 
